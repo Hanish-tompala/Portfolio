@@ -3,6 +3,11 @@ on:
   push:
     branches: ["main"]
   workflow_dispatch:
+
+# Added permissions to allow pushing to the repository
+permissions:
+  contents: write
+
 jobs:
   deploy-to-gh-pages:
     name: Deploy to GitHub Pages
@@ -17,20 +22,21 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: npm install
+        # Added --legacy-peer-deps to handle React 19/Next 16 conflicts
+        run: npm install --legacy-peer-deps
 
       - name: Build and Deploy
         env:
+          # Ensure this secret is named PRIVATE_TOKEN in your Repo Settings
           PERSONAL_TOKEN: ${{ secrets.PRIVATE_TOKEN }} 
         run: |
           npm run build-for-gh-pages
           
-          # Basic Git config (removes the GPG error)
           git config --global user.name 'Hanish-tompala'
           git config --global user.email 'hanishtompla@gmail.com'
           
-          # Clone target repo and sync files
-          git clone https://${{ secrets.PRIVATE_TOKEN }}@github.com/Hanish-tompala/Hanish-tompala.github.io.git out_repo
+          # Use the environment variable consistently
+          git clone https://${PERSONAL_TOKEN}@github.com/Hanish-tompala/Hanish-tompala.github.io.git out_repo
           rm -rf out_repo/*
           cp -r out/* out_repo/
           touch out_repo/.nojekyll
