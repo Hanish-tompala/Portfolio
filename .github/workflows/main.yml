@@ -28,7 +28,7 @@ jobs:
       - name: Build and Deploy
         env:
           # Ensure 'PRIVATE_TOKEN' is added in Repo Settings > Secrets > Actions
-          PERSONAL_TOKEN: ${{ secrets.PRIVATE_TOKEN }} 
+          PERSONAL_TOKEN: ${{ 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 }} 
         run: |
           npm run build-for-gh-pages
           
