@@ -9,37 +9,33 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4 # Use stable v4
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20 # LTS is more stable than v24 for deployments
+          node-version: 20
 
       - name: Install dependencies
-        run: npm i
+        run: npm install
 
       - name: Build and Deploy
         env:
-          # You need to create this secret in your repo settings if not using GITHUB_TOKEN
           PERSONAL_TOKEN: ${{ secrets.PRIVATE_TOKEN }} 
         run: |
           npm run build-for-gh-pages
           
-          # Configure basic git info (No GPG needed)
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          # Basic Git config (Removes GPG requirement)
+          git config --global user.name 'Hanish-tompala'
+          git config --global user.email 'hanishtompla@gmail.com'
           
-          # Clone the target repo
-          git clone https://${{ secrets.PRIVATE_TOKEN }}@github.com/${{ github.repository_owner }}/${{ github.repository_owner }}.github.io.git out_repo
-          
-          # Sync files
+          # Clone target repo and sync files
+          git clone https://${{ secrets.PRIVATE_TOKEN }}@github.com/Hanish-tompala/Hanish-tompala.github.io.git out_repo
           rm -rf out_repo/*
           cp -r out/* out_repo/
           touch out_repo/.nojekyll
           
-          # Commit and Push
           cd out_repo
           git add .
-          git diff-index --quiet HEAD || git commit -m "Deploy Portfolio: ${{ github.sha }}"
+          git diff-index --quiet HEAD || git commit -m "Deploy Portfolio: ${GITHUB_SHA::8}"
           git push origin main
