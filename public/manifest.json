@@ -1,0 +1,15 @@
+{
+  "name": "Hanish Tompala Portfolio",
+  "short_name": "Hanish Tompala",
+  "description": "Portfolio of Hanish Tompala - CSE Student & Developer",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#06b6d4",
+  "orientation": "portrait-primary",
+  "categories": [
+    "portfolio",
+    "technology",
+    "development"
+  ]
+}
