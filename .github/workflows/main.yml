@@ -4,7 +4,7 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
-# Added permissions to allow pushing to the repository
+# Grant write permissions for the deployment
 permissions:
   contents: write
 
@@ -22,12 +22,12 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        # Added --legacy-peer-deps to handle React 19/Next 16 conflicts
+        # Bypasses peer dependency conflicts between Next.js 16 and React 19
         run: npm install --legacy-peer-deps
 
       - name: Build and Deploy
         env:
-          # Ensure this secret is named PRIVATE_TOKEN in your Repo Settings
+          # Ensure 'PRIVATE_TOKEN' is added in Repo Settings > Secrets > Actions
           PERSONAL_TOKEN: ${{ secrets.PRIVATE_TOKEN }} 
         run: |
           npm run build-for-gh-pages
@@ -35,8 +35,9 @@ jobs:
           git config --global user.name 'Hanish-tompala'
           git config --global user.email 'hanishtompla@gmail.com'
           
-          # Use the environment variable consistently
+          # Clone using the authenticated token variable
           git clone https://${PERSONAL_TOKEN}@github.com/Hanish-tompala/Hanish-tompala.github.io.git out_repo
+          
           rm -rf out_repo/*
           cp -r out/* out_repo/
           touch out_repo/.nojekyll
