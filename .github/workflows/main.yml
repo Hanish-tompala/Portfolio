@@ -9,33 +9,37 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4 # Use stable v4
+
       - name: Setup Node.js
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 20 # LTS is more stable than v24 for deployments
+
       - name: Install dependencies
         run: npm i
-      - name: Configure git
-        run: |
-          git config --global user.name '${{ github.repository_owner }}'
-          git config --global user.email '${{ github.repository_owner }}@users.noreply.github.com'
-          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-          echo "${{ secrets.GPG_PRIVATE_KEY }}" | base64 --decode | gpg --import
-          git config --global user.signingkey ${{ secrets.GPG_KEY_ID }}
-          git config --global commit.gpgsign true
-      - name: Deploy to gh-pages
+
+      - name: Build and Deploy
+        env:
+          # You need to create this secret in your repo settings if not using GITHUB_TOKEN
+          PERSONAL_TOKEN: ${{ secrets.PRIVATE_TOKEN }} 
         run: |
           npm run build-for-gh-pages
-          git clone https://github.com/${{ github.repository_owner }}/${{ github.repository_owner }}.github.io.git
-          rm -rf ./${{ github.repository_owner }}.github.io/*
-          cp -r out/* ./${{ github.repository_owner }}.github.io/
-          cp docs/PAGES_README.md ./${{ github.repository_owner }}.github.io/README.md
-          cp docs/PAGES_CNAME ./${{ github.repository_owner }}.github.io/CNAME
-          touch ./${{ github.repository_owner }}.github.io/.nojekyll
-          cd ./${{ github.repository_owner }}.github.io/
-          git remote remove origin
-          git remote add origin https://${{ secrets.PRIVATE_TOKEN }}@github.com/${{ github.repository_owner }}/${{ github.repository_owner }}.github.io
+          
+          # Configure basic git info (No GPG needed)
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          # Clone the target repo
+          git clone https://${{ secrets.PRIVATE_TOKEN }}@github.com/${{ github.repository_owner }}/${{ github.repository_owner }}.github.io.git out_repo
+          
+          # Sync files
+          rm -rf out_repo/*
+          cp -r out/* out_repo/
+          touch out_repo/.nojekyll
+          
+          # Commit and Push
+          cd out_repo
           git add .
-          git diff-index --quiet HEAD || git commit -m "Deploy to GitHub Pages"
-          git push --set-upstream origin main
+          git diff-index --quiet HEAD || git commit -m "Deploy Portfolio: ${{ github.sha }}"
+          git push origin main
